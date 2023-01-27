@@ -21,49 +21,75 @@ const dayjs_1 = __importDefault(require("dayjs"));
 const fs_extra_1 = __importDefault(require("fs-extra"));
 const ejs_1 = __importDefault(require("ejs"));
 const cheerio_1 = __importDefault(require("cheerio"));
+const config_1 = require("../get-config/config");
 // -------------------------------------------------------------------------
-// default renderer templates
-const defaultPostTemplate = fs_extra_1.default.readFileSync(path_1.default.resolve(__dirname, '../../../templates/theme/default/post.html'), 'utf-8');
-const defaultIndexTemplate = fs_extra_1.default.readFileSync(path_1.default.resolve(__dirname, '../../../templates/theme/default/index.html'), 'utf-8');
+const presetTemplates = {
+    plain: '../../../templates/theme/plain',
+    'plain-dark': '../../../templates/theme/plain-dark',
+};
 // -------------------------------------------------------------------------
 // generate posts
 const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* () {
     const { build, site, render: renderConfig } = config;
     const { outDir } = build;
-    const { pageSize } = site;
+    const { pageSize } = renderConfig;
     const distDir = path_1.default.resolve(root, outDir);
     const postsRoot = path_1.default.resolve(root, build.postsRootPath);
     const postTemplate = (() => {
-        const tplPath = renderConfig.template.post;
-        if (tplPath) {
-            try {
-                return fs_extra_1.default.readFileSync(path_1.default.join(root, tplPath), 'utf-8');
-            }
-            catch (err) {
-                console.log(`[INFO] ❌ missing template ${tplPath}`);
-                throw err;
-            }
+        let filePath = '';
+        if ((0, lodash_1.isString)(renderConfig.template)) {
+            filePath = path_1.default.resolve(__dirname, `${presetTemplates[renderConfig.template]}/post.html`);
         }
-        return defaultPostTemplate;
+        else if (renderConfig.template.post) {
+            filePath = path_1.default.join(root, renderConfig.template.post);
+        }
+        else {
+            filePath = path_1.default.resolve(__dirname, `${presetTemplates[config_1.DEFAULT_EJS_TEMPLATE]}/post.html`);
+        }
+        try {
+            return fs_extra_1.default.readFileSync(filePath, 'utf-8');
+        }
+        catch (err) {
+            console.log(`[INFO] ❌ missing template: ${filePath}`);
+            throw err;
+        }
     })();
     const indexedTemplate = (() => {
-        const tplPath = renderConfig.template.index;
-        if (tplPath) {
+        let filePath = '';
+        if ((0, lodash_1.isString)(renderConfig.template)) {
+            filePath = path_1.default.resolve(__dirname, `${presetTemplates[renderConfig.template]}/index.html`);
+        }
+        else if (renderConfig.template.index) {
+            filePath = path_1.default.join(root, renderConfig.template.index);
+        }
+        else {
+            filePath = path_1.default.resolve(__dirname, `${presetTemplates[config_1.DEFAULT_EJS_TEMPLATE]}/index.html`);
+        }
+        try {
+            return fs_extra_1.default.readFileSync(filePath, 'utf-8');
+        }
+        catch (err) {
+            console.log(`[INFO] ❌ missing template: ${filePath}`);
+            throw err;
+        }
+    })();
+    const hook = (() => {
+        if (build.hook) {
             try {
-                return fs_extra_1.default.readFileSync(path_1.default.join(root, tplPath), 'utf-8');
+                return require(path_1.default.join(root, build.hook));
             }
             catch (err) {
-                console.log(`[INFO] ❌ missing template ${tplPath}`);
+                console.log(`[INFO] ❌ missing hook file: ${build.hook}`);
                 throw err;
             }
         }
-        return defaultIndexTemplate;
+        return {};
     })();
     // let outs: Out[] = [];
     // -------------------------------------------------------------------------
     // got each post meta
     const sourceMarkdownFiles = (0, each_file_1.getEachFilePath)(postsRoot);
-    const outs = sourceMarkdownFiles
+    let outs = sourceMarkdownFiles
         // -------------------------------------------------------------------------
         // make each post configuration
         // if some day its slow, can use multi thread
@@ -80,9 +106,10 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
         const savedFilename = `${filename}.html`;
         const $ = cheerio_1.default.load(md);
         const textContent = (0, lodash_1.trim)($.text());
+        const postRelativePathInSite = path_1.default.join(relativeDir, savedFilename);
         const out = {
             meta,
-            relativePath: `/${path_1.default.join(relativeDir, savedFilename)}`,
+            relativePath: postRelativePathInSite,
             sourceFileStat: sourceStat,
             filename: savedFilename,
             filenameWithoutExt: filename,
@@ -92,19 +119,24 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
                 mtime: (0, dayjs_1.default)(sourceStat.mtime).format(renderConfig.dateFormatter),
             },
             text: textContent,
-            summary: textContent.length > 100 ? (`${textContent.substring(0, 100)}...`) : textContent,
+            summary: textContent.length > renderConfig.summaryLength
+                ? (`${textContent.substring(0, renderConfig.summaryLength)}...`)
+                : textContent,
             postSavedDir,
             postSavedFullPath: path_1.default.resolve(postSavedDir, savedFilename),
+            staticPath: `${build.publicPath}${postRelativePathInSite}`,
         };
         return out;
-    })
-        // -------------------------------------------------------------------------
-        // default is sort by modify time
-        .sort((a, b) => {
-        const mTimeA = a.sourceFileStat.mtime.getTime();
-        const mTimeB = b.sourceFileStat.mtime.getTime();
-        return mTimeB - mTimeA;
     });
+    // -------------------------------------------------------------------------
+    // default is sort by modify time
+    outs = hook.sortBy
+        ? outs.sort(hook.sortBy)
+        : outs.sort((a, b) => {
+            const mTimeA = a.sourceFileStat.mtime.getTime();
+            const mTimeB = b.sourceFileStat.mtime.getTime();
+            return mTimeB - mTimeA;
+        });
     // -------------------------------------------------------------------------
     // generate each post
     for (let idx = 0, len = outs.length; idx < len; idx++) {
@@ -113,10 +145,16 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
             prevPost: outs[idx - 1],
             nextPost: outs[idx + 1],
         }));
+        if (hook.eachBeforeRenderPost) {
+            yield hook.eachBeforeRenderPost(post);
+        }
         console.log(`[info] saving ${post.relativePath}`);
         // make sure has dir
         yield fs_extra_1.default.mkdirp(post.postSavedDir);
         fs_extra_1.default.writeFile(post.postSavedFullPath, html);
+        if (hook.eachAfterRenderPost) {
+            yield hook.eachAfterRenderPost(post);
+        }
     }
     // -------------------------------------------------------------------------
     // generate indexes
@@ -125,18 +163,26 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
     for (let pageIndex = 0, len = chunks.length; pageIndex < len; pageIndex++) {
         const chunk = chunks[pageIndex];
         const page = pageIndex + 1;
-        const postListHtml = ejs_1.default.render(indexedTemplate, {
+        const options = {
             posts: chunk,
             page,
-            totalPage: len,
+            pageTotal: len,
             totalCount,
             selfPath: `/page/${page}.html`,
-            prevPagePath: page === 2 ? '/index.html' : `/page/${page - 1}.html`,
+            prevPagePath: page === 2
+                ? '/index.html'
+                : `/page/${page - 1}.html`,
             nextPagePath: `/page/${page + 1}.html`,
+            selfStaticPath: `${build.publicPath}page/${page}.html`,
+            prevPageStaticPath: page === 2
+                ? `${build.publicPath}index.html`
+                : `${build.publicPath}page/${page - 1}.html`,
+            nextPageStaticPath: `${build.publicPath}page/${page + 1}.html`,
             isFirstPage: page === 1,
             isEndPage: page === len,
             site: config.site,
-        });
+        };
+        const postListHtml = ejs_1.default.render(indexedTemplate, options);
         let filename = 'index.html';
         let pathPrefix = '/';
         if (pageIndex !== 0) {
@@ -144,9 +190,18 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
             pathPrefix = '/page/';
         }
         const storeRoot = path_1.default.join(distDir, pathPrefix);
+        const hookOptions = Object.assign(Object.assign({}, options), { html: postListHtml, storeRoot,
+            filename,
+            pathPrefix });
+        if (hook.eachBeforeRenderIndexes) {
+            hook.eachBeforeRenderIndexes(hookOptions);
+        }
         yield fs_extra_1.default.mkdirp(storeRoot);
         console.log(`[info] saving ${path_1.default.join(pathPrefix, filename)}`);
         fs_extra_1.default.writeFileSync(path_1.default.join(storeRoot, filename), postListHtml);
+        if (hook.eachAfterRenderIndexes) {
+            hook.eachAfterRenderIndexes(hookOptions);
+        }
     }
     // -------------------------------------------------------------------------
     // copy public resource to dist root
