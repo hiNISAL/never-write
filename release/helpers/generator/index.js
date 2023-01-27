@@ -88,7 +88,10 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
     // let outs: Out[] = [];
     // -------------------------------------------------------------------------
     // got each post meta
-    const sourceMarkdownFiles = (0, each_file_1.getEachFilePath)(postsRoot);
+    const sourceMarkdownFiles = (0, each_file_1.getEachFilePath)(postsRoot)
+        .filter(({ dir }) => {
+        return dir.endsWith('.md');
+    });
     let outs = sourceMarkdownFiles
         // -------------------------------------------------------------------------
         // make each post configuration
