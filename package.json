@@ -1,6 +1,6 @@
 {
   "name": "never-write",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "simple static site generator",
   "main": "./release/index.js",
   "scripts": {
