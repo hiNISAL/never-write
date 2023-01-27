@@ -1,0 +1,54 @@
+{
+  "name": "never-write",
+  "version": "1.0.0",
+  "description": "simple static site generator",
+  "main": "./release/index.js",
+  "scripts": {
+    "test-init": "ts-node ./src/index.ts --init",
+    "test-build": "ts-node ./src/index.ts build",
+    "dev": "ts-node ./src/index.ts build --root=./test/custom",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hiNISAL/never-write.git"
+  },
+  "keywords": [
+    "blog",
+    "static-site",
+    "blog-generator"
+  ],
+  "author": "ARAM",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hiNISAL/never-write/issues"
+  },
+  "homepage": "https://github.com/hiNISAL/never-write#readme",
+  "devDependencies": {
+    "@types/ejs": "^3.1.1",
+    "@types/fs-extra": "^11.0.1",
+    "@types/lodash": "^4.14.191",
+    "@types/markdown-it": "^12.2.3",
+    "@types/yargs": "^17.0.20",
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "dayjs": "^1.11.7",
+    "ejs": "^3.1.8",
+    "fs-extra": "^11.1.0",
+    "highlightjs-cypher": "^1.1.5",
+    "lodash": "^4.17.21",
+    "markdown": "^0.5.0",
+    "markdown-it": "^13.0.1",
+    "markdown-it-highlightjs": "^4.0.1",
+    "markdown-it-meta": "^0.0.1",
+    "yaml": "^2.2.1",
+    "yargs": "^17.6.2"
+  },
+  "bin": {
+    "neverw": "./bin/neverw"
+  }
+}

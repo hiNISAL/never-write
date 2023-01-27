@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= meta.title || filenameWithoutExt %> - <%= site.name %></title>
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/styles/default.min.css" rel="stylesheet"> -->
+  <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css" rel="stylesheet">
+  <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/es/highlight.min.js"></script>
+  <style>
+    body {
+      max-width: 1440px;
+      margin: 64px auto;
+      background-color: black;
+      color: white;
+    }
+
+    .caption {
+      margin-bottom: 32px;
+    }
+
+    a {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="caption"><%= meta.title || filenameWithoutExt %></h1>
+
+  <article>
+    <%- html %>
+  </article>
+
+  <div style="margin-top: 64px">
+    <% if (prevPost) { %>
+      <div>
+        上一篇：<a href="<%= prevPost.staticPath %>"><%= prevPost.meta.title || prevPost.filenameWithoutExt %></a>
+      </div>
+    <% } %>
+
+    <% if (nextPost) { %>
+      <div>
+        下一篇：<a href="<%= nextPost.staticPath %>"><%= nextPost.meta.title || nextPost.filenameWithoutExt %></a>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

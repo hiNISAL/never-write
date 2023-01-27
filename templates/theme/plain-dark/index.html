@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= site.name %></title>
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      max-width: 1440px;
+      margin: 64px auto;
+      background-color: black;
+      color: white;
+    }
+
+    .caption {
+      font-size: 24px;
+      margin-bottom: 32px;
+    }
+
+    .f-16 {
+      font-size: 16px;
+    }
+
+    .f-14 {
+      font-size: 14px;
+    }
+
+    a {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="caption"><%= site.name %></h1>
+
+  <% posts.forEach(function(post){ %>
+    <div style="margin-bottom: 32px;">
+      <h2 style="margin: 0; padding: 0;" class="f-16">
+        <a href="<%= post.staticPath %>" target="_blank"><%= post.meta.title || post.filenameWithoutExt %></a>
+      </h2>
+      <div class="f-14">
+        摘要：<%= post.summary %>
+      </div>
+      <div style="font-size: 14px;">
+        <span>编辑于<%= post.dateFormat.mtime %></span>
+        &nbsp;
+        <span>共<%= post.text.length %>个字</span>
+      </div>
+    </div>
+  <% }); %>
+
+  <div>
+    第 <%= page %> 页 (共 <%= pageTotal %> 页)
+    <% if (!isFirstPage) { %>
+      <a href="<%= prevPageStaticPath %>">上一页</a>
+    <% } %>
+
+    <% if (!isEndPage) { %>
+      <a href="<%= nextPageStaticPath %>">下一页</a>
+    <% } %>
+  </div>
+</body>
+</html>
