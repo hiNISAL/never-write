@@ -99,7 +99,10 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
 
   // -------------------------------------------------------------------------
   // got each post meta
-  const sourceMarkdownFiles = getEachFilePath(postsRoot);
+  const sourceMarkdownFiles = getEachFilePath(postsRoot)
+    .filter(({ dir }) => {
+      return dir.endsWith('.md');
+    });
 
   let outs: Out[] = sourceMarkdownFiles
     // -------------------------------------------------------------------------
