@@ -110,7 +110,7 @@ render:
 
 模板引擎为ejs，在创建阶段会提供一些变量使用，所以自定义模板只要提供符合ejs语法的文件传递给配置项即可。
 
-参考：[https://github.com/hiNISAL/never-write/templates/theme/plain-dark/index.html](https://github.com/hiNISAL/never-write/templates/theme/plain-dark/index.html)
+参考：[https://github.com/hiNISAL/never-write/blob/main/templates/theme/plain-dark/index.html](https://github.com/hiNISAL/never-write/blob/main/templates/theme/plain-dark/index.html)
 
 ### 传递给EJS的选项
 

@@ -94,7 +94,7 @@ the template engined by ejs, in build stage, `never-write` will given some optio
 
 so if need custom the theme, just use options `render.template`, given it a ejs template.
 
-sample：[https://github.com/hiNISAL/never-write/templates/theme/plain-dark/index.html](https://github.com/hiNISAL/never-write/templates/theme/plain-dark/index.html)
+sample：[https://github.com/hiNISAL/never-write/blob/main/templates/theme/plain-dark/index.html](https://github.com/hiNISAL/never-write/blob/main/templates/theme/plain-dark/index.html)
 
 ### EJS OPTIONS
 
