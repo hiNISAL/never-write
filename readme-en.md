@@ -21,7 +21,26 @@ neverw --init
 neverw build
 ```
 
+## NEVERW --INIT
+
+`neverw --init` will generate a base template.
+
+```shell
+# all article write in this dir
+- posts/
+# static resource
+- public/
+# config file
+- never-write.yaml
+```
+
+all articles(markdown file) write in `posts` dir.
+
+can change the root by config(build.postsRootPath).
+
 ## never-write.yaml
+
+the root has `never-write.yaml` mean its a site will handler by never-write.
 
 ```yaml
 site:
@@ -44,7 +63,7 @@ render:
   summaryLength: summary split length
 ```
 
-默认配置
+default config:
 
 ```yaml
 site:

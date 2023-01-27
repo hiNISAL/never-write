@@ -21,7 +21,28 @@ neverw --init
 neverw build
 ```
 
+## NEVERW --INIT
+
+`neverw --init` 命令会生成一个基础模板。
+
+```shell
+# 所有文章、发布内容都写在 posts 目录下
+- posts/
+# 静态资源目录
+- public/
+# 配置文件
+- never-write.yaml
+```
+
+所有文章都写在 `posts` 目录下，目前只会处理 `.md` 后缀的文件。
+
+该目录可以在配置文件中重新制定(build.postsRootPath)。
+
 ## never-write.yaml
+
+`never-write.yaml` 标记了当前目录为一个处理站点，所以所有配置的路径都要当对于配置文件所在的目录。
+
+该配置可以自己创建，也可以用 `neverw --init` 生成。
 
 ```yaml
 site:
