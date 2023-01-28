@@ -25,6 +25,8 @@ export interface NeverWriteConfig {
     // - eachBeforeRenderIndexes
     // - eachAfterRenderIndexes
     hook: string;
+    // is minify html
+    htmlMinify: boolean;
   };
 
   render: {
@@ -62,6 +64,7 @@ export const defaultConfig: NeverWriteConfig = {
     postsRootPath: './posts',
     publicResourcePath: '',
     hook: '',
+    htmlMinify: true,
   },
 
   render: {

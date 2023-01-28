@@ -5,8 +5,22 @@ import { chunk, trim, assign, isString } from 'lodash';
 import dayjs from 'dayjs';
 import fs from 'fs-extra';
 import ejs, { render } from 'ejs';
-import cheerio from 'cheerio';
+import cheerio, { html } from 'cheerio';
 import { DEFAULT_EJS_TEMPLATE, NeverWriteConfig } from '../get-config/config';
+import { minify } from 'html-minifier-terser';
+
+const htmlMini = (html: string, needMini: boolean) => {
+  if (!needMini) {
+    return html;
+  }
+
+  return minify(html, {
+    minifyCSS: true,
+    minifyJS: true,
+    collapseWhitespace: true,
+    removeComments: true,
+  });
+};
 
 // -------------------------------------------------------------------------
 const presetTemplates: Record<string, {
@@ -219,10 +233,10 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
   for (let idx = 0, len = outs.length; idx < len; idx++) {
     const post = outs[idx];
 
-    const html = ejs.render(postTemplate, assign(post, {
+    const html = await htmlMini(ejs.render(postTemplate, assign(post, {
       prevPost: outs[idx - 1],
       nextPost: outs[idx + 1],
-    }));
+    })), build.htmlMinify);
 
     if (hook.eachBeforeRenderPost) {
       await hook.eachBeforeRenderPost(post);
@@ -297,7 +311,7 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
           home,
         };
 
-        const postListHtml = ejs.render(tagIndexesTemplate, options);
+        const postListHtml = await htmlMini(ejs.render(tagIndexesTemplate, options), build.htmlMinify);
 
         const filename = `${page}.html`;
         const pathPrefix = path.join('/tags/', tagName);
@@ -361,7 +375,10 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
         home,
       };
 
-      const postListHtml = ejs.render(indexedTemplate, options);
+      const postListHtml = await htmlMini(
+        ejs.render(indexedTemplate, options),
+        build.htmlMinify,
+      );
 
       let filename = 'index.html';
       let pathPrefix = '/';
