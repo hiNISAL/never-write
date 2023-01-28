@@ -53,6 +53,7 @@ build:
   postsRootPath: markdown files root
   publicResourcePath: static resources, will copy to `outDir`
   hook: hooks file dir
+  htmlMinify: minify output html
 
 render:
   template:
@@ -76,6 +77,7 @@ build:
   publicPath: /
   postsRootPath: ./posts
   publicResourcePath: ./public
+  htmlMinify: true,
   hook:
 
 render:

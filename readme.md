@@ -62,6 +62,8 @@ build:
   publicResourcePath: 静态资源，会直接拷贝到 outDir 下
   # 默认 无
   hook: 一些钩子，在文章、索引生成前后阶段调用
+  # 默认 true
+  htmlMinify: 是否压缩输出的html
 
 render:
   # 可以传递字符串，为内部预设的主题
@@ -94,6 +96,7 @@ build:
   publicPath: /
   postsRootPath: ./posts
   publicResourcePath: ./public
+  htmlMinify: true
   hook:
 
 render:
