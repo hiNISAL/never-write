@@ -1,2 +1,35 @@
 site:
+  # --- site name
   name: hello neverw
+  # --- site description
+  # desc:
+
+# build:
+  # --- output dir
+  # outDir: ./dist
+
+  # --- base URL that app will be deployed at
+  # publicPath: /
+
+  # --- markdown files root
+  # postsRootPath: ./posts
+
+  # --- static resources, will copy to `outDir`
+  # publicResourcePath: ./public
+
+  # --- hooks file dir
+  # hook:
+
+# render:
+  # --- renderer template, `plain-dart` or `plain`
+  # --- also can custom it, sample https://github.com/hiNISAL/never-write/blob/main/readme-en.md#custom-themestyletemplate
+  # template: plain-dark
+
+  # --- indexes page post size
+  # pageSize: 15
+
+  # --- `never-write` will pre handler some date, then pipe to ejs to use, this options is the date formatter
+  # dateFormatter: YYYY/MM/DD hh:mm:ss
+
+  # --- summary length
+  # summaryLength: 100
