@@ -22,6 +22,18 @@ const fs_extra_1 = __importDefault(require("fs-extra"));
 const ejs_1 = __importDefault(require("ejs"));
 const cheerio_1 = __importDefault(require("cheerio"));
 const config_1 = require("../get-config/config");
+const html_minifier_terser_1 = require("html-minifier-terser");
+const htmlMini = (html, needMini) => {
+    if (!needMini) {
+        return html;
+    }
+    return (0, html_minifier_terser_1.minify)(html, {
+        minifyCSS: true,
+        minifyJS: true,
+        collapseWhitespace: true,
+        removeComments: true,
+    });
+};
 // -------------------------------------------------------------------------
 const presetTemplates = {
     plain: {
@@ -174,10 +186,10 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
     const tags = {};
     for (let idx = 0, len = outs.length; idx < len; idx++) {
         const post = outs[idx];
-        const html = ejs_1.default.render(postTemplate, (0, lodash_1.assign)(post, {
+        const html = yield htmlMini(ejs_1.default.render(postTemplate, (0, lodash_1.assign)(post, {
             prevPost: outs[idx - 1],
             nextPost: outs[idx + 1],
-        }));
+        })), build.htmlMinify);
         if (hook.eachBeforeRenderPost) {
             yield hook.eachBeforeRenderPost(post);
         }
@@ -236,7 +248,7 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
                     tags,
                     home,
                 };
-                const postListHtml = ejs_1.default.render(tagIndexesTemplate, options);
+                const postListHtml = yield htmlMini(ejs_1.default.render(tagIndexesTemplate, options), build.htmlMinify);
                 const filename = `${page}.html`;
                 const pathPrefix = path_1.default.join('/tags/', tagName);
                 const hookOptions = Object.assign(Object.assign({}, options), { html: postListHtml, storeRoot,
@@ -285,7 +297,7 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
                 tag: '',
                 home,
             };
-            const postListHtml = ejs_1.default.render(indexedTemplate, options);
+            const postListHtml = yield htmlMini(ejs_1.default.render(indexedTemplate, options), build.htmlMinify);
             let filename = 'index.html';
             let pathPrefix = '/';
             if (pageIndex !== 0) {

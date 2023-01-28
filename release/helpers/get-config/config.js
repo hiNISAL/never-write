@@ -13,6 +13,7 @@ exports.defaultConfig = {
         postsRootPath: './posts',
         publicResourcePath: '',
         hook: '',
+        htmlMinify: true,
     },
     render: {
         pageSize: 15,
