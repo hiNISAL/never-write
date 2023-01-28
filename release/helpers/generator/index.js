@@ -24,8 +24,16 @@ const cheerio_1 = __importDefault(require("cheerio"));
 const config_1 = require("../get-config/config");
 // -------------------------------------------------------------------------
 const presetTemplates = {
-    plain: '../../../templates/theme/plain',
-    'plain-dark': '../../../templates/theme/plain-dark',
+    plain: {
+        index: '../../../templates/theme/plain/index.html',
+        tagIndexes: '../../../templates/theme/plain/index.html',
+        post: '../../../templates/theme/plain/post.html',
+    },
+    'plain-dark': {
+        index: '../../../templates/theme/plain-dark/index.html',
+        post: '../../../templates/theme/plain-dark/post.html',
+        tagIndexes: '../../../templates/theme/plain-dark/index.html',
+    },
 };
 // -------------------------------------------------------------------------
 // generate posts
@@ -35,16 +43,17 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
     const { pageSize } = renderConfig;
     const distDir = path_1.default.resolve(root, outDir);
     const postsRoot = path_1.default.resolve(root, build.postsRootPath);
+    const home = `${build.publicPath}index.html`;
     const postTemplate = (() => {
         let filePath = '';
         if ((0, lodash_1.isString)(renderConfig.template)) {
-            filePath = path_1.default.resolve(__dirname, `${presetTemplates[renderConfig.template]}/post.html`);
+            filePath = path_1.default.resolve(__dirname, `${presetTemplates[renderConfig.template].post}`);
         }
         else if (renderConfig.template.post) {
             filePath = path_1.default.join(root, renderConfig.template.post);
         }
         else {
-            filePath = path_1.default.resolve(__dirname, `${presetTemplates[config_1.DEFAULT_EJS_TEMPLATE]}/post.html`);
+            filePath = path_1.default.resolve(__dirname, `${presetTemplates[config_1.DEFAULT_EJS_TEMPLATE].post}`);
         }
         try {
             return fs_extra_1.default.readFileSync(filePath, 'utf-8');
@@ -57,13 +66,32 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
     const indexedTemplate = (() => {
         let filePath = '';
         if ((0, lodash_1.isString)(renderConfig.template)) {
-            filePath = path_1.default.resolve(__dirname, `${presetTemplates[renderConfig.template]}/index.html`);
+            filePath = path_1.default.resolve(__dirname, `${presetTemplates[renderConfig.template].index}`);
         }
         else if (renderConfig.template.index) {
             filePath = path_1.default.join(root, renderConfig.template.index);
         }
         else {
-            filePath = path_1.default.resolve(__dirname, `${presetTemplates[config_1.DEFAULT_EJS_TEMPLATE]}/index.html`);
+            filePath = path_1.default.resolve(__dirname, `${presetTemplates[config_1.DEFAULT_EJS_TEMPLATE].index}`);
+        }
+        try {
+            return fs_extra_1.default.readFileSync(filePath, 'utf-8');
+        }
+        catch (err) {
+            console.log(`[INFO] ❌ missing template: ${filePath}`);
+            throw err;
+        }
+    })();
+    const tagIndexesTemplate = (() => {
+        let filePath = '';
+        if ((0, lodash_1.isString)(renderConfig.template)) {
+            filePath = path_1.default.resolve(__dirname, `${presetTemplates[renderConfig.template].tagIndexes}`);
+        }
+        else if (renderConfig.template.index) {
+            filePath = path_1.default.join(root, renderConfig.template.tagIndexes);
+        }
+        else {
+            filePath = path_1.default.resolve(__dirname, `${presetTemplates[config_1.DEFAULT_EJS_TEMPLATE].tagIndexes}`);
         }
         try {
             return fs_extra_1.default.readFileSync(filePath, 'utf-8');
@@ -128,6 +156,8 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
             postSavedDir,
             postSavedFullPath: path_1.default.resolve(postSavedDir, savedFilename),
             staticPath: `${build.publicPath}${postRelativePathInSite}`,
+            namespace: 'post',
+            home,
         };
         return out;
     });
@@ -140,8 +170,8 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
             const mTimeB = b.sourceFileStat.mtime.getTime();
             return mTimeB - mTimeA;
         });
-    // -------------------------------------------------------------------------
-    // generate each post
+    ;
+    const tags = {};
     for (let idx = 0, len = outs.length; idx < len; idx++) {
         const post = outs[idx];
         const html = ejs_1.default.render(postTemplate, (0, lodash_1.assign)(post, {
@@ -158,52 +188,123 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
         if (hook.eachAfterRenderPost) {
             yield hook.eachAfterRenderPost(post);
         }
+        // got tag info
+        let tag = post.meta.tag || [];
+        tag.forEach((tagName) => {
+            if (!tags[tagName]) {
+                tags[tagName] = {
+                    posts: [],
+                    staticPath: `${build.publicPath}tags/${tagName}/1.html`,
+                };
+            }
+            tags[tagName].posts.push(post);
+        });
+    }
+    // -------------------------------------------------------------------------
+    // generate tags
+    {
+        const allTagStoreRoot = path_1.default.join(distDir, '/tags/');
+        for (let i of Object.entries(tags)) {
+            const [tagName, tagInfo] = i;
+            const { posts } = tagInfo;
+            const storeRoot = path_1.default.join(allTagStoreRoot, tagName);
+            const chunks = (0, lodash_1.chunk)(posts, pageSize);
+            const totalCount = posts.length;
+            for (let pageIndex = 0, len = chunks.length; pageIndex < len; pageIndex++) {
+                const chunk = chunks[pageIndex];
+                const page = pageIndex + 1;
+                const options = {
+                    posts: chunk,
+                    page,
+                    pageTotal: len,
+                    totalCount,
+                    selfPath: `/tags/${tagName}/${page}.html`,
+                    prevPagePath: page === 1 ? '' : `/tags/${tagName}/${page - 1}.html`,
+                    nextPagePath: page === len ? '' : `/tags/${tagName}/${page + 1}.html`,
+                    selfStaticPath: `${build.publicPath}tags/${tagName}/${page}.html`,
+                    prevPageStaticPath: page === 1
+                        ? ''
+                        : `${build.publicPath}tags/${tagName}/${page - 1}.html`,
+                    nextPageStaticPath: page === len
+                        ? ''
+                        : `${build.publicPath}tags/${tagName}/${page + 1}.html`,
+                    isFirstPage: page === 1,
+                    isEndPage: page === len,
+                    site: config.site,
+                    namespace: 'tag',
+                    tag: tagName,
+                    tags,
+                    home,
+                };
+                const postListHtml = ejs_1.default.render(tagIndexesTemplate, options);
+                const filename = `${page}.html`;
+                const pathPrefix = path_1.default.join('/tags/', tagName);
+                const hookOptions = Object.assign(Object.assign({}, options), { html: postListHtml, storeRoot,
+                    filename,
+                    pathPrefix });
+                yield fs_extra_1.default.mkdirp(storeRoot);
+                if (hook.eachBeforeRenderTagsIndexes) {
+                    hook.eachBeforeRenderTagsIndexes(hookOptions);
+                }
+                console.log(`[info] saving ${path_1.default.join(pathPrefix, filename)}`);
+                fs_extra_1.default.writeFileSync(path_1.default.join(storeRoot, filename), postListHtml);
+                if (hook.eachAfterRenderTagsIndexes) {
+                    hook.eachAfterRenderTagsIndexes(hookOptions);
+                }
+            }
+        }
     }
     // -------------------------------------------------------------------------
     // generate indexes
-    const chunks = (0, lodash_1.chunk)(outs, pageSize);
-    const totalCount = outs.length;
-    for (let pageIndex = 0, len = chunks.length; pageIndex < len; pageIndex++) {
-        const chunk = chunks[pageIndex];
-        const page = pageIndex + 1;
-        const options = {
-            posts: chunk,
-            page,
-            pageTotal: len,
-            totalCount,
-            selfPath: `/page/${page}.html`,
-            prevPagePath: page === 2
-                ? '/index.html'
-                : `/page/${page - 1}.html`,
-            nextPagePath: `/page/${page + 1}.html`,
-            selfStaticPath: `${build.publicPath}page/${page}.html`,
-            prevPageStaticPath: page === 2
-                ? `${build.publicPath}index.html`
-                : `${build.publicPath}page/${page - 1}.html`,
-            nextPageStaticPath: `${build.publicPath}page/${page + 1}.html`,
-            isFirstPage: page === 1,
-            isEndPage: page === len,
-            site: config.site,
-        };
-        const postListHtml = ejs_1.default.render(indexedTemplate, options);
-        let filename = 'index.html';
-        let pathPrefix = '/';
-        if (pageIndex !== 0) {
-            filename = `${page}.html`;
-            pathPrefix = '/page/';
-        }
-        const storeRoot = path_1.default.join(distDir, pathPrefix);
-        const hookOptions = Object.assign(Object.assign({}, options), { html: postListHtml, storeRoot,
-            filename,
-            pathPrefix });
-        if (hook.eachBeforeRenderIndexes) {
-            hook.eachBeforeRenderIndexes(hookOptions);
-        }
-        yield fs_extra_1.default.mkdirp(storeRoot);
-        console.log(`[info] saving ${path_1.default.join(pathPrefix, filename)}`);
-        fs_extra_1.default.writeFileSync(path_1.default.join(storeRoot, filename), postListHtml);
-        if (hook.eachAfterRenderIndexes) {
-            hook.eachAfterRenderIndexes(hookOptions);
+    {
+        const chunks = (0, lodash_1.chunk)(outs, pageSize);
+        const totalCount = outs.length;
+        for (let pageIndex = 0, len = chunks.length; pageIndex < len; pageIndex++) {
+            const chunk = chunks[pageIndex];
+            const page = pageIndex + 1;
+            const options = {
+                posts: chunk,
+                page,
+                pageTotal: len,
+                totalCount,
+                selfPath: `/page/${page}.html`,
+                prevPagePath: page === 2
+                    ? '/index.html'
+                    : `/page/${page - 1}.html`,
+                nextPagePath: `/page/${page + 1}.html`,
+                selfStaticPath: `${build.publicPath}page/${page}.html`,
+                prevPageStaticPath: page === 2
+                    ? `${build.publicPath}index.html`
+                    : `${build.publicPath}page/${page - 1}.html`,
+                nextPageStaticPath: `${build.publicPath}page/${page + 1}.html`,
+                isFirstPage: page === 1,
+                isEndPage: page === len,
+                site: config.site,
+                namespace: 'indexes',
+                tags,
+                tag: '',
+                home,
+            };
+            const postListHtml = ejs_1.default.render(indexedTemplate, options);
+            let filename = 'index.html';
+            let pathPrefix = '/';
+            if (pageIndex !== 0) {
+                filename = `${page}.html`;
+                pathPrefix = '/page/';
+            }
+            const storeRoot = path_1.default.join(distDir, pathPrefix);
+            const hookOptions = Object.assign(Object.assign({}, options), { html: postListHtml, storeRoot,
+                filename,
+                pathPrefix });
+            if (hook.eachBeforeRenderIndexes) {
+                hook.eachBeforeRenderIndexes(hookOptions);
+            }
+            yield fs_extra_1.default.mkdirp(storeRoot);
+            console.log(`[info] saving ${path_1.default.join(pathPrefix, filename)}`);
+            fs_extra_1.default.writeFileSync(path_1.default.join(storeRoot, filename), postListHtml);
+            if (hook.eachAfterRenderIndexes) {
+                hook.eachAfterRenderIndexes(hookOptions);
+            }
         }
     }
     // -------------------------------------------------------------------------
