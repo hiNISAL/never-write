@@ -58,6 +58,7 @@ render:
   template:
     index: indexes page template
     post: post page template
+    tagIndexes: tags indexes page
   pageSize: indexes page post size
   dateFormatter: `never-write` will pre handler some date, then pipe to ejs to use, this options is the date formatter
   summaryLength: summary split length
@@ -129,10 +130,15 @@ interface PostOptions {
   postSavedDir: string;
   // local saved full path
   postSavedFullPath: string;
+  namespace: 'post';
+  // homepage url
+  home: string;
 }
 ```
 
 for indexes page:
+
+`template.index` and `template.tagIndexes` has same options.
 
 ```ts
 interface IndexesOptions {
@@ -162,6 +168,16 @@ interface IndexesOptions {
   isEndPage: boolean;
   // the site option in `never-write.yaml`
   site: { name: string; desc: string };
+  namespace: 'indexes'|'tag';
+  // tag information
+  tag: Record<string, {
+    posts: PostOptions[];
+    staticPath: string;
+  }>;
+  // current page'ss tag
+  tag: '';
+  // homepage url
+  home: string;
 }
 ```
 
@@ -196,6 +212,14 @@ module.exports = {
   eachAfterRenderIndexes(opt): {
     console.log(opt);
   },
+  // before generate each tag indexes file exec
+  eachBeforeRenderTagsIndexes(opt) {
+    console.log(opt);
+  },
+  // after generate each tag indexes file exec
+  eachAfterRenderTagsIndexes(opt) {
+    console.log(opt);
+  },
   // indexed page's posts sort function
   // default is DESC
   sortBy(a, b) {
@@ -203,3 +227,32 @@ module.exports = {
   },
 };
 ```
+
+
+## how to set tag
+
+markdown files header can set config by yaml:
+
+```md
+---
+title: page title
+tag: tag1, tag2, tag3
+---
+
+## content
+
+xixi...haha...
+```
+
+`tag` option will split by `,` and be array.
+
+when markdown in process will group by `tag`.
+
+## reserved folder
+
+those folder name in special case, cannot use under `posts` folder.
+
+- page
+  to store index pages.
+- tags
+  to store tag pages.

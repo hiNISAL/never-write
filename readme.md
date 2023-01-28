@@ -70,6 +70,7 @@ render:
   template:
     index: 索引页面模板
     post: 文章模板
+    tagIndexes: 根据标签聚合的索引页面
 
   # 默认 15
   pageSize: 索引页一页的索引数量
@@ -143,10 +144,15 @@ interface PostOptions {
   postSavedDir: string;
   // 保存在本地的路径
   postSavedFullPath: string;
+  namespace: 'post';
+  // 首页的路径
+  home: string;
 }
 ```
 
 ### 索引页面传递的内容
+
+`template.index` 和 `template.tagIndexes` 获得的属性是一样的。
 
 ```ts
 interface IndexesOptions {
@@ -176,6 +182,16 @@ interface IndexesOptions {
   isEndPage: boolean;
   // never-write.yaml 中的 site 配置项
   site: { name: string; desc: string };
+  namespace: 'indexes'|'tag';
+  // 聚合好的tag
+  tag: Record<string, {
+    posts: PostOptions[];
+    staticPath: string;
+  }>;
+  // 当前页面的tag，如果namespace是indexes，则永远为空
+  tag: '';
+  // 首页路径
+  home: string;
 }
 ```
 
@@ -210,9 +226,45 @@ module.exports = {
   eachAfterRenderIndexes(opt): {
     console.log(opt);
   },
+  // 生成每一页tag索引前执行
+  eachBeforeRenderTagsIndexes(opt) {
+    console.log(opt);
+  },
+  // 生成每一页tag索引后执行
+  eachAfterRenderTagsIndexes(opt) {
+    console.log(opt);
+  },
   // 在索引页中的排序规则
   sortBy(a, b) {
     // ...
   },
 };
 ```
+
+## 怎么配置tag
+
+markdown 文件的头部可以用yaml描述一些信息：
+
+```md
+---
+title: page title
+tag: tag1, tag2, tag3
+---
+
+## 正文内容
+
+嘻嘻哈哈哈
+```
+
+其中`tag`会通过`,`切割后解析成数组（可以直接传递yaml语法中的数组）。
+
+在处理所有markdown文件时，会根据tag聚合。
+
+## 保留目录
+
+这些目录有特殊用途，在`posts`目录下不能使用。
+
+- page
+  用于存放索引分页
+- tags
+  用于存放tag索引页
