@@ -17,6 +17,9 @@ site:
   # --- static resources, will copy to `outDir`
   # publicResourcePath: ./public
 
+  # --- minify output html
+  # htmlMinify: true
+
   # --- hooks file dir
   # hook:
 
