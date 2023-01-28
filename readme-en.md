@@ -98,6 +98,8 @@ sample：[https://github.com/hiNISAL/never-write/blob/main/templates/theme/plain
 
 ### EJS OPTIONS
 
+for post page:
+
 ```ts
 interface PostOptions {
   // markdown file header yaml config
@@ -130,7 +132,7 @@ interface PostOptions {
 }
 ```
 
-### 索引页面传递的内容
+for indexes page:
 
 ```ts
 interface IndexesOptions {
