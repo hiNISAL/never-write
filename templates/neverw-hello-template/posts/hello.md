@@ -1,5 +1,6 @@
 ---
 title: sample page
+tag: javascript
 ---
 
 ```js

@@ -1,3 +1,4 @@
+import { isString, trim } from 'lodash';
 import MDIT from 'markdown-it';
 const mdMeta = require('markdown-it-meta');
 
@@ -13,9 +14,15 @@ md.use(require('markdown-it-highlightjs'), {
 export const parseMarkdown = (mdString: string) => {
   const content = md.render(mdString);
 
+  const meta = JSON.parse(JSON.stringify((md as any).meta));
+
+  if (isString(meta.tag)) {
+    meta.tag = meta.tag.split(',').map(trim);
+  }
+
   const returns = {
     content,
-    meta: JSON.parse(JSON.stringify((md as any).meta)),
+    meta,
   };
 
   (md as any).meta = {};

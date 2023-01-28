@@ -11,11 +11,16 @@
     body {
       max-width: 1440px;
       margin: 64px auto;
+      padding: 0 24px;
     }
 
     .caption {
       font-size: 24px;
       margin-bottom: 32px;
+    }
+
+    .f-17 {
+      font-size: 17px;
     }
 
     .f-16 {
@@ -32,11 +37,33 @@
   </style>
 </head>
 <body>
-  <h1 class="caption"><%= site.name %></h1>
+  <div>
+    <a href="<%= home %>">首页</a>
+  </div>
+
+  <div style="display: flex; justify-content: space-between;">
+    <h1 class="caption">
+      <%= site.name %>
+      <% if (tag) { %>
+        (<%= tag %>)
+      <% } %>
+    </h1>
+
+    <div style="margin-bottom: 32px;">
+      <% if (tags) { %>
+        <div>
+          标签：
+          <% Object.entries(tags).forEach(([tagName, { posts, staticPath }]) => { %>
+            <a href="<%= staticPath %>">[<%= tagName %>(<%= posts.length %>)]</a>&emsp;
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </div>
 
   <% posts.forEach(function(post){ %>
     <div style="margin-bottom: 32px;">
-      <h2 style="margin: 0; padding: 0;" class="f-16">
+      <h2 style="margin: 0; padding: 0;" class="f-17">
         <a href="<%= post.staticPath %>" target="_blank"><%= post.meta.title || post.filenameWithoutExt %></a>
       </h2>
       <div class="f-14">
@@ -45,6 +72,8 @@
       <div style="font-size: 14px;">
         <span>编辑于<%= post.dateFormat.mtime %></span>
         &nbsp;
+        <span><%= (post.meta.tag || []).map(i => `[${i}]`).join(' ') %></span>
+        <br />
         <span>共<%= post.text.length %>个字</span>
       </div>
     </div>

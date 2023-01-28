@@ -1,5 +1,6 @@
 ---
 title: javascript clean code
+tag: javascript
 ---
 
 how to write js clean code?

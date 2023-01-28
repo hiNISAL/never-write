@@ -13,6 +13,7 @@
     body {
       max-width: 1440px;
       margin: 64px auto;
+      padding: 0 24px;
       background-color: black;
       color: white;
     }
@@ -27,6 +28,9 @@
   </style>
 </head>
 <body>
+  <div>
+    <a href="<%= home %>">首页</a>
+  </div>
   <h1 class="caption"><%= meta.title || filenameWithoutExt %></h1>
 
   <article>

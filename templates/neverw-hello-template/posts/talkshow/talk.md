@@ -1,5 +1,6 @@
 ---
 title: talk balabala...
+tag: talk
 ---
 
 it just sample page here..

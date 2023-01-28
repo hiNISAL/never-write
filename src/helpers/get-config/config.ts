@@ -34,6 +34,8 @@ export interface NeverWriteConfig {
       index: string;
       // post page template
       post: string;
+      // tag page template
+      tagIndexes: string;
     }|string;
 
     // post count pre page

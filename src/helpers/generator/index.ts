@@ -9,9 +9,21 @@ import cheerio from 'cheerio';
 import { DEFAULT_EJS_TEMPLATE, NeverWriteConfig } from '../get-config/config';
 
 // -------------------------------------------------------------------------
-const presetTemplates: Record<string, string> = {
-  plain: '../../../templates/theme/plain',
-  'plain-dark': '../../../templates/theme/plain-dark',
+const presetTemplates: Record<string, {
+  index: string;
+  post: string;
+  tagIndexes: string;
+}> = {
+  plain: {
+    index: '../../../templates/theme/plain/index.html',
+    tagIndexes: '../../../templates/theme/plain/index.html',
+    post: '../../../templates/theme/plain/post.html',
+  },
+  'plain-dark': {
+    index: '../../../templates/theme/plain-dark/index.html',
+    post: '../../../templates/theme/plain-dark/post.html',
+    tagIndexes: '../../../templates/theme/plain-dark/index.html',
+  },
 };
 
 // -------------------------------------------------------------------------
@@ -32,6 +44,8 @@ interface Out {
   postSavedDir: string;
   postSavedFullPath: string;
   staticPath: string;
+  namespace: string;
+  home: string;
 }
 
 // -------------------------------------------------------------------------
@@ -44,15 +58,17 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
   const distDir = path.resolve(root, outDir);
   const postsRoot = path.resolve(root, build.postsRootPath);
 
+  const home = `${build.publicPath}index.html`;
+
   const postTemplate = (() => {
     let filePath = '';
 
     if (isString(renderConfig.template)) {
-      filePath = path.resolve(__dirname, `${presetTemplates[renderConfig.template]}/post.html`)
+      filePath = path.resolve(__dirname, `${presetTemplates[renderConfig.template].post}`)
     } else  if (renderConfig.template.post) {
       filePath = path.join(root, renderConfig.template.post);
     } else {
-      filePath = path.resolve(__dirname, `${presetTemplates[DEFAULT_EJS_TEMPLATE]}/post.html`)
+      filePath = path.resolve(__dirname, `${presetTemplates[DEFAULT_EJS_TEMPLATE].post}`)
     }
 
     try {
@@ -67,11 +83,30 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
     let filePath = '';
 
     if (isString(renderConfig.template)) {
-      filePath = path.resolve(__dirname, `${presetTemplates[renderConfig.template]}/index.html`)
+      filePath = path.resolve(__dirname, `${presetTemplates[renderConfig.template].index}`)
     } else if (renderConfig.template.index) {
       filePath = path.join(root, renderConfig.template.index);
     } else {
-      filePath = path.resolve(__dirname, `${presetTemplates[DEFAULT_EJS_TEMPLATE]}/index.html`)
+      filePath = path.resolve(__dirname, `${presetTemplates[DEFAULT_EJS_TEMPLATE].index}`)
+    }
+
+    try {
+      return fs.readFileSync(filePath, 'utf-8');
+    } catch (err) {
+      console.log(`[INFO] ❌ missing template: ${filePath}`);
+      throw err;
+    }
+  })();
+
+  const tagIndexesTemplate = (() => {
+    let filePath = '';
+
+    if (isString(renderConfig.template)) {
+      filePath = path.resolve(__dirname, `${presetTemplates[renderConfig.template].tagIndexes}`)
+    } else if (renderConfig.template.index) {
+      filePath = path.join(root, renderConfig.template.tagIndexes);
+    } else {
+      filePath = path.resolve(__dirname, `${presetTemplates[DEFAULT_EJS_TEMPLATE].tagIndexes}`)
     }
 
     try {
@@ -151,6 +186,8 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
         postSavedDir,
         postSavedFullPath: path.resolve(postSavedDir, savedFilename),
         staticPath: `${build.publicPath}${postRelativePathInSite}`,
+        namespace: 'post',
+        home,
       };
 
       return out;
@@ -169,6 +206,16 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
 
   // -------------------------------------------------------------------------
   // generate each post
+
+  // tags
+  interface Tag {
+    [propType: string]: {
+      posts: Out[];
+      staticPath: string;
+    };
+  };
+  const tags: Tag = {};
+
   for (let idx = 0, len = outs.length; idx < len; idx++) {
     const post = outs[idx];
 
@@ -190,68 +237,161 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
     if (hook.eachAfterRenderPost) {
       await hook.eachAfterRenderPost(post);
     }
+
+    // got tag info
+    let tag = post.meta.tag || [];
+
+    tag.forEach((tagName: string) => {
+      if (!tags[tagName]) {
+        tags[tagName] = {
+          posts: [],
+          staticPath: `${build.publicPath}tags/${tagName}/1.html`,
+        };
+      }
+
+      tags[tagName].posts.push(post);
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // generate tags
+  {
+    const allTagStoreRoot = path.join(distDir, '/tags/');
+
+    for (let i of Object.entries(tags)) {
+      const [tagName, tagInfo] = i;
+
+      const { posts } = tagInfo;
+
+      const storeRoot = path.join(allTagStoreRoot, tagName);
+
+      const chunks = chunk(posts, pageSize);
+
+      const totalCount = posts.length;
+
+      for (let pageIndex = 0, len = chunks.length; pageIndex < len; pageIndex++) {
+        const chunk = chunks[pageIndex];
+        const page = pageIndex + 1;
+
+        const options = {
+          posts: chunk,
+          page,
+          pageTotal: len,
+          totalCount,
+          selfPath: `/tags/${tagName}/${page}.html`,
+          prevPagePath: page === 1 ? '' : `/tags/${tagName}/${page - 1}.html`,
+          nextPagePath: page === len ? '' : `/tags/${tagName}/${page + 1}.html`,
+          selfStaticPath: `${build.publicPath}tags/${tagName}/${page}.html`,
+          prevPageStaticPath: page === 1
+            ? ''
+            : `${build.publicPath}tags/${tagName}/${page - 1}.html`,
+          nextPageStaticPath: page === len
+            ? ''
+            : `${build.publicPath}tags/${tagName}/${page + 1}.html`,
+          isFirstPage: page === 1,
+          isEndPage: page === len,
+          site: config.site,
+          namespace: 'tag',
+          tag: tagName,
+          tags,
+          home,
+        };
+
+        const postListHtml = ejs.render(tagIndexesTemplate, options);
+
+        const filename = `${page}.html`;
+        const pathPrefix = path.join('/tags/', tagName);
+
+        const hookOptions = {
+          ...options,
+          html: postListHtml,
+          storeRoot,
+          filename,
+          pathPrefix,
+        };
+
+        await fs.mkdirp(storeRoot);
+
+        if (hook.eachBeforeRenderTagsIndexes) {
+          hook.eachBeforeRenderTagsIndexes(hookOptions);
+        }
+
+        console.log(`[info] saving ${path.join(pathPrefix, filename)}`);
+        fs.writeFileSync(path.join(storeRoot, filename), postListHtml);
+
+        if (hook.eachAfterRenderTagsIndexes) {
+          hook.eachAfterRenderTagsIndexes(hookOptions);
+        }
+      }
+    }
   }
 
   // -------------------------------------------------------------------------
   // generate indexes
-  const chunks = chunk(outs, pageSize);
+  {
+    const chunks = chunk(outs, pageSize);
 
-  const totalCount = outs.length;
+    const totalCount = outs.length;
 
-  for (let pageIndex = 0, len = chunks.length; pageIndex < len; pageIndex++) {
-    const chunk = chunks[pageIndex];
-    const page = pageIndex + 1;
+    for (let pageIndex = 0, len = chunks.length; pageIndex < len; pageIndex++) {
+      const chunk = chunks[pageIndex];
+      const page = pageIndex + 1;
 
-    const options = {
-      posts: chunk,
-      page,
-      pageTotal: len,
-      totalCount,
-      selfPath: `/page/${page}.html`,
-      prevPagePath: page === 2
-        ? '/index.html'
-        : `/page/${page - 1}.html`,
-      nextPagePath: `/page/${page + 1}.html`,
-      selfStaticPath: `${build.publicPath}page/${page}.html`,
-      prevPageStaticPath: page === 2
-        ? `${build.publicPath}index.html`
-        : `${build.publicPath}page/${page - 1}.html`,
-      nextPageStaticPath: `${build.publicPath}page/${page + 1}.html`,
-      isFirstPage: page === 1,
-      isEndPage: page === len,
-      site: config.site,
-    };
+      const options = {
+        posts: chunk,
+        page,
+        pageTotal: len,
+        totalCount,
+        selfPath: `/page/${page}.html`,
+        prevPagePath: page === 2
+          ? '/index.html'
+          : `/page/${page - 1}.html`,
+        nextPagePath: `/page/${page + 1}.html`,
+        selfStaticPath: `${build.publicPath}page/${page}.html`,
+        prevPageStaticPath: page === 2
+          ? `${build.publicPath}index.html`
+          : `${build.publicPath}page/${page - 1}.html`,
+        nextPageStaticPath: `${build.publicPath}page/${page + 1}.html`,
+        isFirstPage: page === 1,
+        isEndPage: page === len,
+        site: config.site,
+        namespace: 'indexes',
+        tags,
+        tag: '',
+        home,
+      };
 
-    const postListHtml = ejs.render(indexedTemplate, options);
+      const postListHtml = ejs.render(indexedTemplate, options);
 
-    let filename = 'index.html';
-    let pathPrefix = '/';
-    if (pageIndex !== 0) {
-      filename = `${page}.html`;
-      pathPrefix = '/page/';
-    }
+      let filename = 'index.html';
+      let pathPrefix = '/';
+      if (pageIndex !== 0) {
+        filename = `${page}.html`;
+        pathPrefix = '/page/';
+      }
 
-    const storeRoot = path.join(distDir, pathPrefix);
+      const storeRoot = path.join(distDir, pathPrefix);
 
-    const hookOptions = {
-      ...options,
-      html: postListHtml,
-      storeRoot,
-      filename,
-      pathPrefix,
-    };
+      const hookOptions = {
+        ...options,
+        html: postListHtml,
+        storeRoot,
+        filename,
+        pathPrefix,
+      };
 
-    if (hook.eachBeforeRenderIndexes) {
-      hook.eachBeforeRenderIndexes(hookOptions);
-    }
+      if (hook.eachBeforeRenderIndexes) {
+        hook.eachBeforeRenderIndexes(hookOptions);
+      }
 
-    await fs.mkdirp(storeRoot);
+      await fs.mkdirp(storeRoot);
 
-    console.log(`[info] saving ${path.join(pathPrefix, filename)}`);
-    fs.writeFileSync(path.join(storeRoot, filename), postListHtml);
+      console.log(`[info] saving ${path.join(pathPrefix, filename)}`);
+      fs.writeFileSync(path.join(storeRoot, filename), postListHtml);
 
-    if (hook.eachAfterRenderIndexes) {
-      hook.eachAfterRenderIndexes(hookOptions);
+      if (hook.eachAfterRenderIndexes) {
+        hook.eachAfterRenderIndexes(hookOptions);
+      }
     }
   }
 
