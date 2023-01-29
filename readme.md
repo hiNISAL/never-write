@@ -279,3 +279,7 @@ tag: tag1, tag2, tag3
   用于存放索引分页
 - tags
   用于存放tag索引页
+
+## 其他
+
+默认主题的样式照搬了hexo的[cactus](https://probberechts.github.io/hexo-theme-cactus/)主题，感谢（自己想真的太麻烦了。

@@ -257,7 +257,7 @@ xixi...haha...
 
 when markdown in process will group by `tag`.
 
-## reserved folder
+## RESERVED FOLDER
 
 those folder name in special case, cannot use under `posts` folder.
 
@@ -265,3 +265,7 @@ those folder name in special case, cannot use under `posts` folder.
   to store index pages.
 - tags
   to store tag pages.
+
+## OTHERS
+
+the default theme style copy from hexo theme [cactus](https://probberechts.github.io/hexo-theme-cactus/), thanks (new theme its too hard for me).
