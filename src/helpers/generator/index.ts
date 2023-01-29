@@ -117,7 +117,7 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
 
     if (isString(renderConfig.template)) {
       filePath = path.resolve(__dirname, `${presetTemplates[renderConfig.template].tagIndexes}`)
-    } else if (renderConfig.template.index) {
+    } else if (renderConfig.template.tagIndexes) {
       filePath = path.join(root, renderConfig.template.tagIndexes);
     } else {
       filePath = path.resolve(__dirname, `${presetTemplates[DEFAULT_EJS_TEMPLATE].tagIndexes}`)
