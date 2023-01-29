@@ -46,6 +46,11 @@ const presetTemplates = {
         post: '../../../templates/theme/plain-dark/post.html',
         tagIndexes: '../../../templates/theme/plain-dark/index.html',
     },
+    'cactus-dark': {
+        index: '../../../templates/theme/cactus-dark/index.html',
+        post: '../../../templates/theme/cactus-dark/post.html',
+        tagIndexes: '../../../templates/theme/cactus-dark/index.html',
+    },
 };
 // -------------------------------------------------------------------------
 // generate posts
@@ -99,7 +104,7 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
         if ((0, lodash_1.isString)(renderConfig.template)) {
             filePath = path_1.default.resolve(__dirname, `${presetTemplates[renderConfig.template].tagIndexes}`);
         }
-        else if (renderConfig.template.index) {
+        else if (renderConfig.template.tagIndexes) {
             filePath = path_1.default.join(root, renderConfig.template.tagIndexes);
         }
         else {
@@ -170,6 +175,7 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
             staticPath: `${build.publicPath}${postRelativePathInSite}`,
             namespace: 'post',
             home,
+            render: renderConfig,
         };
         return out;
     });
@@ -247,6 +253,7 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
                     tag: tagName,
                     tags,
                     home,
+                    render: renderConfig,
                 };
                 const postListHtml = yield htmlMini(ejs_1.default.render(tagIndexesTemplate, options), build.htmlMinify);
                 const filename = `${page}.html`;
@@ -296,6 +303,7 @@ const generator = (root, config) => __awaiter(void 0, void 0, void 0, function* 
                 tags,
                 tag: '',
                 home,
+                render: renderConfig,
             };
             const postListHtml = yield htmlMini(ejs_1.default.render(indexedTemplate, options), build.htmlMinify);
             let filename = 'index.html';
