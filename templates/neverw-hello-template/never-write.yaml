@@ -24,9 +24,9 @@ site:
   # hook:
 
 # render:
-  # --- renderer template, `plain-dart` or `plain`
+  # --- renderer template, `cactus-dark` or `plain-dart` or `plain`
   # --- also can custom it, sample https://github.com/hiNISAL/never-write/blob/main/readme-en.md#custom-themestyletemplate
-  # template: plain-dark
+  # template: cactus-dark
 
   # --- indexes page post size
   # pageSize: 15
@@ -36,3 +36,9 @@ site:
 
   # --- summary length
   # summaryLength: 100
+
+  # --- introduce
+  # introduce:
+
+  # --- text at footer, support html
+  # footerText

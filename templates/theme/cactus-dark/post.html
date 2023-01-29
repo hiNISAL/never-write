@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= meta.title || filenameWithoutExt %> - <%= site.name %></title>
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="//at.alicdn.com/t/c/font_3871019_eaolda4ejb.css">
+  <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css" rel="stylesheet">
+  <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/es/highlight.min.js"></script>
+  <style>
+    body h1,
+    body .h1 {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      color: #2bbc8a;
+      letter-spacing: 0.01em;
+      font-weight: 700;
+      font-style: normal;
+      font-size: 1.5em;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-font-smoothing: antialiased;
+    }
+    body h2,
+    body .h2 {
+      position: relative;
+      display: block;
+      margin-top: 2rem;
+      margin-bottom: 0.5rem;
+      color: #eee;
+      text-transform: none;
+      letter-spacing: normal;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+    body h3 {
+      color: #eee;
+      text-decoration: underline;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    body h4,
+    body h5,
+    body h6 {
+      display: inline;
+      text-decoration: none;
+      color: #ccc;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    body h3,
+    body h4,
+    body h5,
+    body h6 {
+      margin-top: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    body hr {
+      border: 0.5px dashed #ccc;
+      opacity: 0.5;
+      margin: 0;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    body strong {
+      font-weight: bold;
+    }
+    body em,
+    body cite {
+      font-style: italic;
+    }
+    body sup,
+    body sub {
+      position: relative;
+      vertical-align: baseline;
+      font-size: 0.75em;
+      line-height: 0;
+    }
+    body sup {
+      top: -0.5em;
+    }
+    body sub {
+      bottom: -0.2em;
+    }
+    body small {
+      font-size: 0.85em;
+    }
+    body acronym,
+    body abbr {
+      border-bottom: 1px dotted;
+    }
+    body ul,
+    body ol,
+    body dl {
+      line-height: 1.725;
+    }
+    body ul ul,
+    body ol ul,
+    body ul ol,
+    body ol ol {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    body ol {
+      list-style: decimal;
+    }
+    body dt {
+      font-weight: bold;
+    }
+    body table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+      overflow: auto;
+      display: block;
+    }
+    body th {
+      padding: 8px;
+      border-bottom: 1px dashed #666;
+      color: #eee;
+      font-weight: bold;
+      font-size: 13px;
+    }
+    body td {
+      padding: 0 8px;
+      border-bottom: none;
+    }
+
+    article header .posttitle {
+      margin-top: 0;
+      margin-bottom: 0;
+      text-transform: none;
+      font-size: 1.5em;
+      line-height: 1.25;
+    }
+    article header .meta {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+    article header .meta * {
+      color: #ccc;
+      font-size: 0.85rem;
+    }
+    article header .author {
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      font-weight: 700;
+    }
+    article header .postdate {
+      display: inline;
+    }
+    article .content h2:before {
+      position: absolute;
+      top: -4px;
+      left: -1rem;
+      color: #2bbc8a;
+      content: "#";
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    article .content img,
+    article .content video {
+      display: block;
+      margin: auto;
+      max-width: 100%;
+      height: auto;
+    }
+    article .content .video-container {
+      position: relative;
+      overflow: hidden;
+      padding-top: 56.25%;
+      height: 0;
+    }
+    article .content .video-container iframe,
+    article .content .video-container object,
+    article .content .video-container embed {
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin-top: 0;
+      width: 100%;
+      height: 100%;
+    }
+    article .content blockquote {
+      margin: 1rem 10px;
+      padding: 0.5em 10px;
+      background: inherit;
+      color: #ccffb6;
+      quotes: "\201C" "\201D" "\2018" "\2019";
+      font-weight: bold;
+    }
+    article .content blockquote p {
+      margin: 0;
+    }
+    article .content blockquote:before {
+      margin-right: 0.25em;
+      color: #ccffb6;
+      content: "\201C";
+      vertical-align: -0.4em;
+      font-size: 2em;
+      line-height: 0.1em;
+    }
+    article .content blockquote footer {
+      margin: line-height 0;
+      color: #666;
+      font-size: 11px;
+    }
+    article .content blockquote footer a {
+      background-image: linear-gradient(transparent, transparent 5px, #666 5px, #666);
+      color: #666;
+    }
+    article .content blockquote footer a:hover {
+      background-image: linear-gradient(transparent, transparent 4px, #858585 4px, #858585);
+      color: #858585;
+    }
+    article .content blockquote footer cite:before {
+      padding: 0 0.5em;
+      content: "—";
+    }
+    article .content .pullquote {
+      margin: 0;
+      width: 45%;
+      text-align: left;
+    }
+    article .content .pullquote.left {
+      margin-right: 1em;
+      margin-left: 0.5em;
+    }
+    article .content .pullquote.right {
+      margin-right: 0.5em;
+      margin-left: 1em;
+    }
+    article .content .caption {
+      position: relative;
+      display: block;
+      margin-top: 0.5em;
+      color: #666;
+      text-align: center;
+      font-size: 0.9em;
+    }
+
+    pre {
+      overflow-x: auto;
+      /* padding: 10px 15px; */
+      padding-bottom: 0;
+      border: 1px dotted #666;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: "Menlo", "Meslo LG", monospace;
+      line-height: 22px;
+      -webkit-border-radius: 4px;
+    }
+    pre code {
+      display: block;
+      padding: 0;
+      border: none;
+    }
+    code {
+      padding: 0 5px;
+      border: 1px dotted #666;
+      border-radius: 2px;
+      -webkit-border-radius: 2px;
+    }
+  </style>
+  <style>
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      border-top: 2px solid #c9cacc;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      height: 100%;
+      background-color: #1d1f21;
+      color: #c9cacc;
+      font-display: swap;
+      font-weight: 400;
+      font-size: 14px;
+      font-family: "Menlo", "Meslo LG", monospace;
+      line-height: 1.725;
+      text-rendering: geometricPrecision;
+      flex: 1;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-font-smoothing: antialiased;
+      margin-right: auto;
+      margin-left: auto;
+      padding-right: 2rem;
+      padding-left: 2rem;
+      max-width: 48rem;
+    }
+
+    .wrapper {
+      padding: 5em 0;
+      max-width: 48rem;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      overflow-wrap: break-word;
+    }
+
+    .green {
+      color: #2bbc8a;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .c-a {
+      color: #c9cacc;
+    }
+
+    .site-name {
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: #2bbc8a;
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: 1.5em;
+    }
+
+    h2 {
+      font-size: 1.4em;
+    }
+
+    h3 {
+      font-size: 1.3em;
+    }
+
+    h4 {
+      font-size: 1.2em;
+    }
+
+    h5 {
+      font-size: 1.1em;
+    }
+
+    h6 {
+      font-size: 1.0em;
+    }
+
+    .underline {
+      color: #2bbc8a;
+      background-image: linear-gradient(transparent, transparent 5px, #c9cacc 5px, #c9cacc);
+      background-position: bottom;
+      background-size: 100% 6px;
+      background-repeat: repeat-x;
+      height: 21px;
+    }
+
+    .underline:hover {
+      color: #2bbc8a;
+      background-image: linear-gradient(transparent, transparent 4px, #d480aa 4px, #d480aa);
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 0;
+      margin-bottom: 10px;
+      width: 100%;
+      color: #666;
+      vertical-align: top;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div>
+      <header class="header">
+        <div style="margin-bottom: 2rem;">
+          <div class="c-a site-name"><%= site.name %></div>
+          <nav><a class="nav-item green" href="<%= home %>">首页</a></nav>
+        </div>
+      </header>
+
+      <div style="margin-bottom: 24px;">
+        <h1 class="caption"><%= meta.title || filenameWithoutExt %></h1>
+        <span><%= dateFormat.mtime %></span>
+      </div>
+
+      <hr />
+
+      <section>
+        <%- html %>
+      </section>
+
+      <hr />
+
+      <% if (prevPost || nextPost) { %>
+        <div style="width: 1px; height: 16px;"></div>
+      <% } %>
+
+      <% if (prevPost) { %>
+        <div>
+          上一篇：<a class="underline" href="<%= prevPost.staticPath %>"><%= prevPost.meta.title || prevPost.filenameWithoutExt %></a>
+        </div>
+      <% } %>
+
+      <% if (nextPost) { %>
+        <div>
+          下一篇：<a class="underline" href="<%= nextPost.staticPath %>"><%= nextPost.meta.title || nextPost.filenameWithoutExt %></a>
+        </div>
+      <% } %>
+    </div>
+
+    <footer class="footer">
+      <%- render.footerText %>
+    </footer>
+  </div>
+</body>
+</html>

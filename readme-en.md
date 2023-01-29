@@ -56,6 +56,7 @@ build:
   htmlMinify: minify output html
 
 render:
+  # or given one of string 'cactus-dark'|'plain'|'plain-dark'
   template:
     index: indexes page template
     post: post page template
@@ -63,6 +64,7 @@ render:
   pageSize: indexes page post size
   dateFormatter: `never-write` will pre handler some date, then pipe to ejs to use, this options is the date formatter
   summaryLength: summary split length
+  footerText: text at foot, support html
 ```
 
 default config:
@@ -81,10 +83,11 @@ build:
   hook:
 
 render:
-  template: plain-dark
+  template: cactus-dark
   pageSize: 15
   dateFormatter: YYYY/MM/DD hh:mm:ss
   summaryLength: 100
+  footerText:
 ```
 
 ## TIPS
@@ -135,6 +138,8 @@ interface PostOptions {
   namespace: 'post';
   // homepage url
   home: string;
+  // render config
+  render: Record<string, any>;
 }
 ```
 
@@ -180,6 +185,8 @@ interface IndexesOptions {
   tag: '';
   // homepage url
   home: string;
+  // render config
+  render: Record<string, any>;
 }
 ```
 

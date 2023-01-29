@@ -68,7 +68,7 @@ build:
 render:
   # 可以传递字符串，为内部预设的主题
   # 如果传递对象，则会根据路径对应去找文件
-  # 默认 plain-dark，目前可选 plain|plain-dark
+  # 默认 cactus-dark，目前可选 cactus-dark|plain|plain-dark
   template:
     index: 索引页面模板
     post: 文章模板
@@ -82,6 +82,9 @@ render:
 
   # 默认 100
   summaryLength: 摘要的长度
+
+  # 默认 空
+  footerText: 页脚文案，可以是html
 ```
 
 默认配置
@@ -100,10 +103,11 @@ build:
   hook:
 
 render:
-  template: plain-dark
+  template: cactus-dark
   pageSize: 15
   dateFormatter: YYYY/MM/DD hh:mm:ss
   summaryLength: 100
+  footerText:
 ```
 
 ## 注意点
@@ -150,6 +154,8 @@ interface PostOptions {
   namespace: 'post';
   // 首页的路径
   home: string;
+  // render config
+  render: Record<string, any>;
 }
 ```
 
@@ -195,6 +201,8 @@ interface IndexesOptions {
   tag: '';
   // 首页路径
   home: string;
+  // render config
+  render: Record<string, any>;
 }
 ```
 

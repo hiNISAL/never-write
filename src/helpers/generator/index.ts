@@ -38,6 +38,11 @@ const presetTemplates: Record<string, {
     post: '../../../templates/theme/plain-dark/post.html',
     tagIndexes: '../../../templates/theme/plain-dark/index.html',
   },
+  'cactus-dark': {
+    index: '../../../templates/theme/cactus-dark/index.html',
+    post: '../../../templates/theme/cactus-dark/post.html',
+    tagIndexes: '../../../templates/theme/cactus-dark/index.html',
+  },
 };
 
 // -------------------------------------------------------------------------
@@ -48,6 +53,7 @@ interface Out {
   filename: string;
   filenameWithoutExt: string;
   site: Record<string, any>;
+  render: Record<string, any>;
   meta: Record<string, any>;
   html: string;
   dateFormat: {
@@ -202,6 +208,7 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
         staticPath: `${build.publicPath}${postRelativePathInSite}`,
         namespace: 'post',
         home,
+        render: renderConfig,
       };
 
       return out;
@@ -309,6 +316,7 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
           tag: tagName,
           tags,
           home,
+          render: renderConfig,
         };
 
         const postListHtml = await htmlMini(ejs.render(tagIndexesTemplate, options), build.htmlMinify);
@@ -373,6 +381,7 @@ export const generator = async (root: string, config: NeverWriteConfig) => {
         tags,
         tag: '',
         home,
+        render: renderConfig,
       };
 
       const postListHtml = await htmlMini(

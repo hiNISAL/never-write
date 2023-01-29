@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= site.name %></title>
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="//at.alicdn.com/t/c/font_3871019_eaolda4ejb.css">
+  <style>
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      border-top: 2px solid #c9cacc;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      height: 100%;
+      background-color: #1d1f21;
+      color: #c9cacc;
+      font-display: swap;
+      font-weight: 400;
+      font-size: 14px;
+      font-family: "Menlo", "Meslo LG", monospace;
+      line-height: 1.725;
+      text-rendering: geometricPrecision;
+      flex: 1;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-font-smoothing: antialiased;
+      margin-right: auto;
+      margin-left: auto;
+      padding-right: 2rem;
+      padding-left: 2rem;
+      max-width: 48rem;
+    }
+
+    .wrapper {
+      padding: 5em 0;
+      max-width: 48rem;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      overflow-wrap: break-word;
+    }
+
+    .green {
+      color: #2bbc8a;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .c-a {
+      color: #c9cacc;
+    }
+
+    .site-name {
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    h1 {
+      color: #2bbc8a;
+      margin-top: 3rem;
+      font-size: 1.5em;
+      font-weight: 700;
+    }
+
+    .post-item {
+      display: flex;
+      margin-bottom: 5px;
+    }
+
+    .post-item .post-mtime {
+      margin-right: 2em;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .underline {
+      background-image: linear-gradient(transparent, transparent 5px, #c9cacc 5px, #c9cacc);
+      background-position: bottom;
+      background-size: 100% 6px;
+      background-repeat: repeat-x;
+      height: 21px;
+    }
+
+    .underline:hover {
+      background-image: linear-gradient(transparent, transparent 4px, #d480aa 4px, #d480aa);
+    }
+
+    .post-item .post-title {
+      color: #c9cacc;
+      cursor: pointer;
+    }
+
+    .post-item .post-title a {
+      color: #c9cacc;
+    }
+
+    .tag-list {
+      display: flex;
+    }
+
+    .tag-list .tag {
+      margin-right: 2em;
+      cursor: pointer;
+    }
+
+    .tag-list .tag a:hover {
+      color: #c9cacc;
+    }
+
+    .prev-page {
+      margin-right: 4px;
+    }
+
+    .page-number {
+      display: flex;
+      align-items: center;
+      margin-top: 1em;
+      color: #666;
+      font-size: 0.8rem;
+    }
+
+    .page-number a {
+      color: #666;
+    }
+
+    .page-number i {
+      font-size: 0.4rem;
+    }
+
+    .page-pointer {
+      cursor: pointer;
+    }
+
+    .nav-item {
+      cursor: pointer;
+      color: #2bbc8a;
+    }
+
+    .nav-item:hover {
+      color: #2bbc8a;
+      opacity: .7;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 0;
+      margin-bottom: 10px;
+      width: 100%;
+      color: #666;
+      vertical-align: top;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div>
+      <header class="header">
+        <div style="margin-bottom: 2rem;">
+          <div class="c-a site-name"><%= site.name %></div>
+          <nav><a class="nav-item green" href="<%= home %>">首页</a></nav>
+        </div>
+      </header>
+
+      <% if (render.introduce) { %>
+      <div class="c-a">
+        <%- render.introduce %>
+      </div>
+      <% } %>
+
+      <section>
+        <% if (tag) { %>
+          <h1>[<%= tag %>]</h1>
+          <% } else { %>
+          <h1>Writing</h1>
+        <% } %>
+
+        <% posts.forEach(function(post){ %>
+          <div class="post-item">
+            <div class="post-mtime"><%= post.dateFormat.mtime %></div>
+            <div class="post-title underline"><a href="<%= post.staticPath %>"><%= post.meta.title || post.filenameWithoutExt %></a></div>
+          </div>
+        <% }); %>
+
+        <div class="page-number">
+          <% if (!isFirstPage) { %>
+            <a href="<%= prevPageStaticPath %>">
+              <span class="page-pointer" style="display: block; transform: rotate(180deg); position: relative; left: -8px;">
+                <i class="nwd nwdnext"></i>&nbsp;
+              </span>
+            </a>
+          <% } %>
+          <div><%= page %>/<%= pageTotal %></div>
+          <% if (!isEndPage) { %>
+            <a href="<%= nextPageStaticPath %>"><span class="page-pointer">&nbsp;<i class="nwd nwdnext"></i></span></a>
+          <% } %>
+        </div>
+
+      </section>
+
+
+      <% if (tags) { %>
+        <section>
+          <h1>Tags</h1>
+
+          <div class="tag-list">
+            <% Object.entries(tags).forEach(([tagName, { posts, staticPath }]) => { %>
+              <div class="tag underline"><a class="c-a" href="<%= staticPath %>"><%= tagName %>(<%= posts.length %>)</a></div>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+    </div>
+
+    <footer class="footer">
+      <%- render.footerText %>
+    </footer>
+  </div>
+</body>
+</html>

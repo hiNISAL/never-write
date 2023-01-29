@@ -1,4 +1,4 @@
-export const DEFAULT_EJS_TEMPLATE = 'plain-dark';
+export const DEFAULT_EJS_TEMPLATE = 'cactus-dark';
 
 export interface NeverWriteConfig {
   site: {
@@ -48,6 +48,9 @@ export interface NeverWriteConfig {
 
     // summary split len
     summaryLength: number;
+
+    // footer text
+    footerText: string;
   };
 }
 
@@ -68,6 +71,7 @@ export const defaultConfig: NeverWriteConfig = {
   },
 
   render: {
+    footerText: '',
     pageSize: 15,
     template: DEFAULT_EJS_TEMPLATE,
     dateFormatter: 'YYYY/MM/DD hh:mm:ss',
