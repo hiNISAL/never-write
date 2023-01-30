@@ -5,6 +5,8 @@
 
 `never-write` 是一个基于 `markdown` 的静态站点生成工具。
 
+<img width="100%" src="https://github.com/hiNISAL/never-write/blob/main/assets/preview.png" />
+
 ## 安装
 
 ```shell

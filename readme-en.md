@@ -5,6 +5,8 @@
 
 `never-write` is a static site generator by `markdown`.
 
+<img width="100%" src="https://github.com/hiNISAL/never-write/blob/main/assets/preview.png" />
+
 ## INSTALL
 
 ```shell
